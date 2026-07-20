@@ -1,3 +1,6 @@
+<!-- Maki Dice -->
+<!-- github.com/andrewmichaelpowell -->
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +11,6 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#30B0C7">
 
-<!-- iOS home-screen support (iOS doesn't read the manifest for these) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Maki Dice">
@@ -149,7 +151,6 @@
     color: #FFFFFF;
   }
 
-  /* --- D10 view label rows --- */
   .label-row {
     display: flex;
     width: 100%;
@@ -175,7 +176,6 @@
     color: var(--teal);
   }
 
-  /* --- Back button --- */
   .back-button-row {
     display: flex;
     flex-shrink: 0;
@@ -214,7 +214,8 @@
 
 <div id="app">
 
-  <!-- ===================== MAIN VIEW ===================== -->
+  <!-- Main View -->
+
   <section id="screen-main" class="screen active">
     <div class="spacer"></div>
 
@@ -273,7 +274,8 @@
     <div class="group-gap"></div>
   </section>
 
-  <!-- ===================== D10 VIEW ===================== -->
+  <!-- D10 View -->
+
   <section id="screen-d10" class="screen">
     <div class="back-button-row">
       <button class="back-button" id="d10-back" aria-label="Back">
@@ -346,7 +348,7 @@
   "use strict";
   const REVEAL_DELAY = 100;
 
-  function randInt(min, max) { // inclusive both ends
+  function randInt(min, max) { 
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
@@ -355,12 +357,13 @@
     document.getElementById(screenId).classList.add("active");
   }
 
-  // ============= MAIN VIEW =============
+  // Main View
+
   (function initMainView() {
     let diceNumber = "";
     let diceType = "";
-    let editSide = 1;   // 1 = editing diceNumber, 2 = editing diceType
-    let resetInput = 1; // 1 = next digit should clear prior roll first
+    let editSide = 1;
+    let resetInput = 1;
     let resultValue = 0;
 
     const resultEl = document.getElementById("main-result");
@@ -448,12 +451,12 @@
     document.getElementById("open-d10").addEventListener("click", () => goTo("screen-d10"));
   })();
 
-  // ============= D10 VIEW =============
+  // D10 View
   (function initD10View() {
     let diceValue = 0;
     let difficultyValue = 0;
     let successesValue = 0;
-    let selected = 1; // 1 = editing dice pool, 2 = editing difficulty
+    let selected = 1;
 
     const diceValueEl = document.getElementById("d10-dice-value");
     const difficultyValueEl = document.getElementById("d10-difficulty-value");
