@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Maki Dice</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#30B0C7">
+
+<!-- iOS home-screen support (iOS doesn't read the manifest for these) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Maki Dice">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<style>
+  :root {
+    color-scheme: light dark;
+    --teal: #30B0C7;
+    --orange: #FF9500;
+    --label: #000000;
+    --secondary-bg: #EFEFF4;
+    --bg: #FFFFFF;
+    --button-text-on-secondary: #000000;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --label: #FFFFFF;
+      --secondary-bg: #1C1C1E;
+      --bg: #000000;
+      --button-text-on-secondary: #FFFFFF;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    overscroll-behavior: none;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--label);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 500px;
+    height: 100vh;
+    height: 100dvh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .screen.active {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+
+  .result {
+    font-size: 48px;
+    font-weight: 400;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    line-height: 1.1;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .group-gap {
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .row-gap {
+    height: 8px;
+    flex-shrink: 0;
+  }
+
+  .label-row-gap {
+    height: 4px;
+    flex-shrink: 0;
+  }
+
+  button.tile {
+    flex: 1;
+    height: 50px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--label);
+    background: var(--secondary-bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: filter 0.1s;
+  }
+
+  button.tile:active {
+    filter: brightness(0.85);
+  }
+
+  button.tile.teal {
+    background: var(--teal);
+    color: #FFFFFF;
+  }
+
+  button.tile.orange {
+    background: var(--orange);
+    color: #FFFFFF;
+  }
+
+  /* --- D10 view label rows --- */
+  .label-row {
+    display: flex;
+    width: 100%;
+  }
+
+  .label-row .name {
+    flex: 1 1 auto;
+    font-size: 28px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .label-row .value {
+    flex: 0 0 auto;
+    font-size: 28px;
+    text-align: right;
+    white-space: nowrap;
+    padding-left: 12px;
+  }
+
+  .label-row .name.selected {
+    color: var(--teal);
+  }
+
+  /* --- Back button --- */
+  .back-button-row {
+    display: flex;
+    flex-shrink: 0;
+    padding-bottom: 8px;
+  }
+
+  .back-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--secondary-bg);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .back-button svg {
+    display: block;
+  }
+
+  .back-button svg path {
+    stroke: var(--label);
+  }
+
+  .number-pad {
+    display: flex;
+    flex-direction: column;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== MAIN VIEW ===================== -->
+  <section id="screen-main" class="screen active">
+    <div class="spacer"></div>
+
+    <div id="main-result" class="result">0</div>
+
+    <div class="group-gap" style="height:16px"></div>
+
+    <div class="number-pad">
+      <div class="btn-row">
+        <button class="tile" data-quick="4">1d4</button>
+        <button class="tile" data-quick="6">1d6</button>
+        <button class="tile" data-quick="8">1d8</button>
+      </div>
+      <div class="row-gap"></div>
+      <div class="btn-row">
+        <button class="tile" data-quick="10">1d10</button>
+        <button class="tile" data-quick="12">1d12</button>
+        <button class="tile" data-quick="20">1d20</button>
+      </div>
+      <div class="row-gap"></div>
+      <div class="btn-row">
+        <button class="tile orange" id="main-clear">Clear</button>
+        <button class="tile" data-quick="100">1d100</button>
+        <button class="tile teal" id="open-d10">D10</button>
+      </div>
+    </div>
+
+    <div class="group-gap"></div>
+
+    <div class="number-pad">
+      <div class="btn-row">
+        <button class="tile" data-digit="1">1</button>
+        <button class="tile" data-digit="2">2</button>
+        <button class="tile" data-digit="3">3</button>
+      </div>
+      <div class="row-gap"></div>
+      <div class="btn-row">
+        <button class="tile" data-digit="4">4</button>
+        <button class="tile" data-digit="5">5</button>
+        <button class="tile" data-digit="6">6</button>
+      </div>
+      <div class="row-gap"></div>
+      <div class="btn-row">
+        <button class="tile" data-digit="7">7</button>
+        <button class="tile" data-digit="8">8</button>
+        <button class="tile" data-digit="9">9</button>
+      </div>
+      <div class="row-gap"></div>
+      <div class="btn-row">
+        <button class="tile orange" id="main-d">d</button>
+        <button class="tile" id="main-zero">0</button>
+        <button class="tile orange" id="main-roll">Roll</button>
+      </div>
+    </div>
+
+    <div class="group-gap"></div>
+  </section>
+
+  <!-- ===================== D10 VIEW ===================== -->
+  <section id="screen-d10" class="screen">
+    <div class="back-button-row">
+      <button class="back-button" id="d10-back" aria-label="Back">
+        <svg width="14" height="14" viewBox="0 0 14 14">
+          <path d="M9.5 1.5 L4 7 L9.5 12.5" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="label-row">
+      <div class="name" id="d10-dice-label">Dice</div>
+      <div class="value" id="d10-dice-value">0</div>
+    </div>
+    <div class="label-row-gap"></div>
+    <div class="label-row">
+      <div class="name" id="d10-difficulty-label">Difficulty</div>
+      <div class="value" id="d10-difficulty-value">0</div>
+    </div>
+    <div class="label-row-gap"></div>
+    <div class="label-row">
+      <div class="name">Successes</div>
+      <div class="value" id="d10-successes-value">0</div>
+    </div>
+
+    <div style="height:16px; flex-shrink:0;"></div>
+
+    <div class="btn-row">
+      <button class="tile teal" id="d10-select-dice">Dice</button>
+      <button class="tile" id="d10-select-difficulty">Difficulty</button>
+    </div>
+
+    <div class="group-gap"></div>
+
+    <div class="number-pad">
+      <div class="btn-row">
+        <button class="tile" data-pool="1">1</button>
+        <button class="tile" data-pool="2">2</button>
+        <button class="tile" data-pool="3">3</button>
+      </div>
+      <div class="row-gap"></div>
+      <div class="btn-row">
+        <button class="tile" data-pool="4">4</button>
+        <button class="tile" data-pool="5">5</button>
+        <button class="tile" data-pool="6">6</button>
+      </div>
+      <div class="row-gap"></div>
+      <div class="btn-row">
+        <button class="tile" data-pool="7">7</button>
+        <button class="tile" data-pool="8">8</button>
+        <button class="tile" data-pool="9">9</button>
+      </div>
+      <div class="row-gap"></div>
+      <div class="btn-row">
+        <button class="tile orange" id="d10-clear">Clear</button>
+        <button class="tile" data-pool="10">10</button>
+        <button class="tile orange" id="d10-roll">Roll</button>
+      </div>
+    </div>
+
+    <div class="group-gap"></div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const REVEAL_DELAY = 100;
+
+  function randInt(min, max) { // inclusive both ends
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function goTo(screenId) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(screenId).classList.add("active");
+  }
+
+  // ============= MAIN VIEW =============
+  (function initMainView() {
+    let diceNumber = "";
+    let diceType = "";
+    let editSide = 1;   // 1 = editing diceNumber, 2 = editing diceType
+    let resetInput = 1; // 1 = next digit should clear prior roll first
+    let resultValue = 0;
+
+    const resultEl = document.getElementById("main-result");
+
+    function revealAfterDelay(value) {
+      resultEl.textContent = "";
+      setTimeout(() => { resultEl.textContent = value; }, REVEAL_DELAY);
+    }
+
+    function quickRoll(sides) {
+      resultValue = randInt(1, sides);
+      editSide = 1;
+      resetInput = 1;
+      diceNumber = "";
+      diceType = "";
+      revealAfterDelay(String(resultValue));
+    }
+
+    function clear() {
+      editSide = 1;
+      diceNumber = "";
+      diceType = "";
+      revealAfterDelay("0");
+    }
+
+    function setRight(v) {
+      if (diceType.length < 3) {
+        diceType += String(v);
+        resultEl.textContent = diceNumber + "d" + diceType;
+      }
+    }
+
+    function setLeft(v) {
+      if (resetInput === 1) {
+        diceNumber = "";
+        diceType = "";
+        resetInput = 0;
+      }
+      if (diceNumber.length < 3) {
+        diceNumber += String(v);
+        resultEl.textContent = diceNumber;
+      }
+    }
+
+    function appendDigit(v) {
+      if (editSide === 1) setLeft(v);
+      if (editSide === 2) setRight(v);
+    }
+
+    function zero() {
+      if (editSide === 1 && diceNumber !== "" && resetInput === 0) appendDigit(0);
+      if (editSide === 2 && diceType !== "" && resetInput === 0) appendDigit(0);
+    }
+
+    function pressD() {
+      if (editSide === 1 && resetInput === 0) {
+        editSide = 2;
+        resultEl.textContent = diceNumber + "d";
+      }
+    }
+
+    function roll() {
+      if (diceNumber !== "" && diceType !== "") {
+        const n = parseInt(diceNumber, 10);
+        const sides = parseInt(diceType, 10);
+        let total = 0;
+        for (let i = 0; i < n; i++) total += randInt(1, sides);
+        resultValue = total;
+        revealAfterDelay(String(resultValue));
+        editSide = 1;
+        resetInput = 1;
+      }
+    }
+
+    document.querySelectorAll("[data-quick]").forEach(btn => {
+      btn.addEventListener("click", () => quickRoll(parseInt(btn.dataset.quick, 10)));
+    });
+    document.querySelectorAll("#screen-main [data-digit]").forEach(btn => {
+      btn.addEventListener("click", () => appendDigit(parseInt(btn.dataset.digit, 10)));
+    });
+    document.getElementById("main-clear").addEventListener("click", clear);
+    document.getElementById("main-zero").addEventListener("click", zero);
+    document.getElementById("main-d").addEventListener("click", pressD);
+    document.getElementById("main-roll").addEventListener("click", roll);
+    document.getElementById("open-d10").addEventListener("click", () => goTo("screen-d10"));
+  })();
+
+  // ============= D10 VIEW =============
+  (function initD10View() {
+    let diceValue = 0;
+    let difficultyValue = 0;
+    let successesValue = 0;
+    let selected = 1; // 1 = editing dice pool, 2 = editing difficulty
+
+    const diceValueEl = document.getElementById("d10-dice-value");
+    const difficultyValueEl = document.getElementById("d10-difficulty-value");
+    const successesValueEl = document.getElementById("d10-successes-value");
+    const diceLabelEl = document.getElementById("d10-dice-label");
+    const difficultyLabelEl = document.getElementById("d10-difficulty-label");
+    const selectDiceBtn = document.getElementById("d10-select-dice");
+    const selectDifficultyBtn = document.getElementById("d10-select-difficulty");
+
+    function updateSelectionStyles() {
+      diceLabelEl.classList.toggle("selected", selected === 1);
+      difficultyLabelEl.classList.toggle("selected", selected === 2);
+      selectDiceBtn.classList.toggle("teal", selected === 1);
+      selectDifficultyBtn.classList.toggle("teal", selected === 2);
+    }
+
+    function clear() {
+      diceValue = 0;
+      difficultyValue = 0;
+      successesValue = 0;
+      diceValueEl.textContent = "";
+      difficultyValueEl.textContent = "";
+      successesValueEl.textContent = "";
+      setTimeout(() => {
+        diceValueEl.textContent = "0";
+        difficultyValueEl.textContent = "0";
+        successesValueEl.textContent = "0";
+      }, REVEAL_DELAY);
+    }
+
+    function addValueToSide(v) {
+      if (selected === 1) {
+        diceValue = v;
+        diceValueEl.textContent = String(diceValue);
+      }
+      if (selected === 2) {
+        difficultyValue = v;
+        difficultyValueEl.textContent = String(difficultyValue);
+      }
+    }
+
+    function roll() {
+      if (diceValue !== 0 && difficultyValue !== 0) {
+        let successes = 0;
+        for (let i = 0; i < diceValue; i++) {
+          const r = randInt(1, 10);
+          if (r === 1) successes -= 1;
+          else if (r === 10) successes += 2;
+          else if (r >= difficultyValue) successes += 1;
+        }
+        successesValue = successes;
+        successesValueEl.textContent = "";
+        setTimeout(() => { successesValueEl.textContent = String(successesValue); }, REVEAL_DELAY);
+      }
+    }
+
+    selectDiceBtn.addEventListener("click", () => { selected = 1; updateSelectionStyles(); });
+    selectDifficultyBtn.addEventListener("click", () => { selected = 2; updateSelectionStyles(); });
+    document.querySelectorAll("[data-pool]").forEach(btn => {
+      btn.addEventListener("click", () => addValueToSide(parseInt(btn.dataset.pool, 10)));
+    });
+    document.getElementById("d10-clear").addEventListener("click", clear);
+    document.getElementById("d10-roll").addEventListener("click", roll);
+    document.getElementById("d10-back").addEventListener("click", () => goTo("screen-main"));
+
+    updateSelectionStyles();
+  })();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch((err) => {
+        console.warn("Service worker registration failed:", err);
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
