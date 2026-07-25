@@ -1,3 +1,3 @@
-Maki Dice (iOS)
+Maki Dice (Web)
 
-This applications allows you to roll dice for role-playing games. It features buttons for each of the standard polyhedral dice, as well as a number pad for entering custom rolls. It also includes a tool for use with games that incorporate a dice and difficulty system.
+Maki Dice is a fast and easy dice roller for tabletop role-playing games. Roll any of the standard polyhedral dice with a single tap, enter custom rolls using the number pad, or calculate successes for games that use a dice and difficulty system.
