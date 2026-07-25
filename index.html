@@ -222,7 +222,7 @@ github.com/andrewmichaelpowell
   <section id="screen-main" class="screen active">
     <div class="spacer"></div>
 
-    <div id="main-result" class="result">0</div>
+    <div id="main-result" class="result"></div>
 
     <div class="group-gap" style="height:16px"></div>
 
@@ -293,17 +293,17 @@ github.com/andrewmichaelpowell
 
     <div class="label-row">
       <div class="name" id="d10-dice-label">Dice</div>
-      <div class="value" id="d10-dice-value">0</div>
+      <div class="value" id="d10-dice-value"></div>
     </div>
     <div class="label-row-gap"></div>
     <div class="label-row">
       <div class="name" id="d10-difficulty-label">Difficulty</div>
-      <div class="value" id="d10-difficulty-value">0</div>
+      <div class="value" id="d10-difficulty-value"></div>
     </div>
     <div class="label-row-gap"></div>
     <div class="label-row">
       <div class="name">Successes</div>
-      <div class="value" id="d10-successes-value">0</div>
+      <div class="value" id="d10-successes-value"></div>
     </div>
 
     <div style="height:16px; flex-shrink:0;"></div>
@@ -380,8 +380,8 @@ github.com/andrewmichaelpowell
       resultValue = randInt(1, sides);
       editSide = 1;
       resetInput = 1;
-      diceNumber = "";
-      diceType = "";
+      diceNumber = "1";
+      diceType = String(sides);
       revealAfterDelay(String(resultValue));
     }
 
@@ -389,7 +389,6 @@ github.com/andrewmichaelpowell
       editSide = 1;
       diceNumber = "";
       diceType = "";
-      revealAfterDelay("0");
     }
 
     function setRight(v) {
@@ -484,12 +483,7 @@ github.com/andrewmichaelpowell
       diceValueEl.textContent = "";
       difficultyValueEl.textContent = "";
       successesValueEl.textContent = "";
-      setTimeout(() => {
-        diceValueEl.textContent = "0";
-        difficultyValueEl.textContent = "0";
-        successesValueEl.textContent = "0";
-      }, REVEAL_DELAY);
-    }
+     }
 
     function addValueToSide(v) {
       if (selected === 1) {
