@@ -1,5 +1,6 @@
-// Bump this on every deploy that changes any cached file — it's what
-// forces clients to fetch fresh copies instead of serving stale ones.
+// Maki Dice (Web)
+// github.com/andrewmichaelpowell
+
 const CACHE_VERSION = "maki-dice-v1";
 
 const CORE_ASSETS = [
@@ -34,9 +35,6 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Cache-first: the whole app is local/static, so once it's cached there's
-// no need to hit the network again except to pick up a new version (which
-// happens automatically next time CACHE_VERSION changes).
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
