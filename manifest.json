@@ -1,7 +1,7 @@
 {
   "name": "Maki Dice",
   "short_name": "Maki Dice",
-  "description": "A dice roller: quick d4-d100 rolls, a custom NdM builder, and a d10 dice-pool roller with difficulty and successes.",
+  "description": "Dice for role-playing games",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
