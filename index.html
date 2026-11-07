@@ -12,20 +12,20 @@ github.com/andrewmichaelpowell
 <title>Maki Dice</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#FF8D28">
+<meta name="theme-color" content="#F05C22">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Maki Dice">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=6">
 
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=5">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=5">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=6">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=6">
 <style>
   :root {
     color-scheme: light dark;
-    --teal: #30B0C7;
-    --orange: #FF9500;
+    --green: #045030;
+    --orange: #F05C22;
     --label: #000000;
     --secondary-bg: #EFEFF4;
     --bg: #FFFFFF;
@@ -144,8 +144,8 @@ github.com/andrewmichaelpowell
     filter: brightness(0.85);
   }
 
-  button.tile.teal {
-    background: var(--teal);
+  button.tile.green {
+    background: var(--green);
     color: #FFFFFF;
   }
 
@@ -176,7 +176,7 @@ github.com/andrewmichaelpowell
   }
 
   .label-row .name.selected {
-    color: var(--teal);
+    color: var(--green);
   }
 
   .back-button-row {
@@ -242,7 +242,7 @@ github.com/andrewmichaelpowell
       <div class="btn-row">
         <button class="tile orange" id="main-clear">Clear</button>
         <button class="tile" data-quick="100">1d100</button>
-        <button class="tile teal" id="open-d10">D10</button>
+        <button class="tile green" id="open-d10">D10</button>
       </div>
     </div>
 
@@ -309,7 +309,7 @@ github.com/andrewmichaelpowell
     <div style="height:16px; flex-shrink:0;"></div>
 
     <div class="btn-row">
-      <button class="tile teal" id="d10-select-dice">Dice</button>
+      <button class="tile green" id="d10-select-dice">Dice</button>
       <button class="tile" id="d10-select-difficulty">Difficulty</button>
     </div>
 
@@ -473,8 +473,8 @@ github.com/andrewmichaelpowell
     function updateSelectionStyles() {
       diceLabelEl.classList.toggle("selected", selected === 1);
       difficultyLabelEl.classList.toggle("selected", selected === 2);
-      selectDiceBtn.classList.toggle("teal", selected === 1);
-      selectDifficultyBtn.classList.toggle("teal", selected === 2);
+      selectDiceBtn.classList.toggle("green", selected === 1);
+      selectDifficultyBtn.classList.toggle("green", selected === 2);
     }
 
     function clear() {

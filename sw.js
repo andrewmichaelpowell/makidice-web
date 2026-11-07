@@ -1,18 +1,18 @@
 // Maki Dice (Web)
 // github.com/andrewmichaelpowell
 
-const CACHE_VERSION = "maki-dice-v5";
+const CACHE_VERSION = "maki-dice-v6";
 
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icons/icon-192.png?v=5",
-  "./icons/icon-512.png?v=5",
-  "./icons/icon-maskable-192.png?v=5",
-  "./icons/icon-maskable-512.png?v=5",
-  "./icons/apple-touch-icon.png?v=5",
-  "./icons/favicon-32.png?v=5",
+  "./icons/icon-192.png?v=6",
+  "./icons/icon-512.png?v=6",
+  "./icons/icon-maskable-192.png?v=6",
+  "./icons/icon-maskable-512.png?v=6",
+  "./icons/apple-touch-icon.png?v=6",
+  "./icons/favicon-32.png?v=6",
 ];
 
 self.addEventListener("install", (event) => {
