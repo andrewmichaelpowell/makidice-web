@@ -15,7 +15,7 @@ github.com/andrewmichaelpowell
 <meta name="theme-color" content="#F05C22">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Maki Dice">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=6">
 
@@ -23,22 +23,12 @@ github.com/andrewmichaelpowell
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=6">
 <style>
   :root {
-    color-scheme: light dark;
-    --green: #045030;
+    color-scheme: dark;
     --orange: #F05C22;
-    --label: #000000;
-    --secondary-bg: #EFEFF4;
-    --bg: #FFFFFF;
-    --button-text-on-secondary: #000000;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --label: #FFFFFF;
-      --secondary-bg: #1C1C1E;
-      --bg: #000000;
-      --button-text-on-secondary: #FFFFFF;
-    }
+    --label: #FFFFFF;
+    --secondary-bg: #1C1C1E;
+    --bg: #000000;
+    --button-text-on-secondary: #FFFFFF;
   }
 
   * {
@@ -65,8 +55,14 @@ github.com/andrewmichaelpowell
     max-width: 500px;
     height: 100vh;
     height: 100dvh;
-    position: relative;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
+  }
+
+  .pages {
+    flex: 1;
+    position: relative;
   }
 
   .screen {
@@ -76,7 +72,6 @@ github.com/andrewmichaelpowell
     flex-direction: column;
     padding: 0 16px;
     padding-top: max(16px, env(safe-area-inset-top));
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
     visibility: hidden;
     pointer-events: none;
   }
@@ -124,7 +119,7 @@ github.com/andrewmichaelpowell
     flex: 1;
     height: 50px;
     border: none;
-    border-radius: 12px;
+    border-radius: 25px;
     font-size: 16px;
     font-weight: 500;
     font-family: inherit;
@@ -142,11 +137,6 @@ github.com/andrewmichaelpowell
 
   button.tile:active {
     filter: brightness(0.85);
-  }
-
-  button.tile.green {
-    background: var(--green);
-    color: #FFFFFF;
   }
 
   button.tile.orange {
@@ -175,36 +165,79 @@ github.com/andrewmichaelpowell
     padding-left: 12px;
   }
 
-  .label-row .name.selected {
-    color: var(--green);
-  }
-
-  .back-button-row {
+  .chooser {
+    position: relative;
     display: flex;
     flex-shrink: 0;
-    padding-bottom: 8px;
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--secondary-bg);
   }
 
-  .back-button {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--secondary-bg);
+  .chooser-indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / 2);
+    border-radius: 999px;
+    background: var(--orange);
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .chooser[data-selected="1"] .chooser-indicator {
+    transform: translateX(100%);
+  }
+
+  .chooser button {
+    position: relative;
+    flex: 1;
     border: none;
+    background: none;
+    padding: 0 8px;
+    font-family: inherit;
+    color: var(--label);
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .segment-chooser {
+    height: 50px;
+  }
+
+  .segment-chooser button {
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.6;
+    transition: color 0.25s, opacity 0.25s;
+  }
+
+  .segment-chooser button[aria-selected="true"] {
+    color: #FFFFFF;
+    opacity: 1;
+  }
+
+  .page-chooser-row {
+    display: flex;
+    justify-content: center;
     flex-shrink: 0;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
 
-  .back-button svg {
+  .page-chooser button {
+    width: 80px;
+    height: 44px;
+    font-size: 19px;
+    font-weight: 600;
+  }
+
+  .page-chooser svg {
     display: block;
-  }
-
-  .back-button svg path {
-    stroke: var(--label);
+    fill: var(--label);
   }
 
   .number-pad {
@@ -216,6 +249,7 @@ github.com/andrewmichaelpowell
 <body>
 
 <div id="app">
+ <div class="pages">
 
   <!-- Main View -->
 
@@ -242,7 +276,7 @@ github.com/andrewmichaelpowell
       <div class="btn-row">
         <button class="tile orange" id="main-clear">Clear</button>
         <button class="tile" data-quick="100">1d100</button>
-        <button class="tile green" id="open-d10">D10</button>
+        <button class="tile orange" id="main-roll-quick">Roll</button>
       </div>
     </div>
 
@@ -280,24 +314,15 @@ github.com/andrewmichaelpowell
   <!-- D10 View -->
 
   <section id="screen-d10" class="screen">
-    <div class="back-button-row">
-      <button class="back-button" id="d10-back" aria-label="Back">
-        <svg width="14" height="14" viewBox="0 0 14 14">
-          <path d="M9.5 1.5 L4 7 L9.5 12.5" stroke-width="2.2"
-                stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
-      </button>
-    </div>
-
     <div class="spacer"></div>
 
     <div class="label-row">
-      <div class="name" id="d10-dice-label">Dice</div>
+      <div class="name">Dice</div>
       <div class="value" id="d10-dice-value"></div>
     </div>
     <div class="label-row-gap"></div>
     <div class="label-row">
-      <div class="name" id="d10-difficulty-label">Difficulty</div>
+      <div class="name">Difficulty</div>
       <div class="value" id="d10-difficulty-value"></div>
     </div>
     <div class="label-row-gap"></div>
@@ -308,9 +333,10 @@ github.com/andrewmichaelpowell
 
     <div style="height:16px; flex-shrink:0;"></div>
 
-    <div class="btn-row">
-      <button class="tile green" id="d10-select-dice">Dice</button>
-      <button class="tile" id="d10-select-difficulty">Difficulty</button>
+    <div class="chooser segment-chooser" id="d10-chooser" role="tablist" data-selected="0">
+      <div class="chooser-indicator"></div>
+      <button role="tab" id="d10-select-dice" aria-selected="true">Dice</button>
+      <button role="tab" id="d10-select-difficulty" aria-selected="false">Difficulty</button>
     </div>
 
     <div class="group-gap"></div>
@@ -344,6 +370,20 @@ github.com/andrewmichaelpowell
     <div class="group-gap"></div>
   </section>
 
+ </div>
+
+  <div class="page-chooser-row">
+    <div class="chooser page-chooser" id="page-chooser" role="tablist" data-selected="0">
+      <div class="chooser-indicator"></div>
+      <button role="tab" id="page-main" aria-label="Calculator" aria-selected="true">
+        <svg width="26" height="26" viewBox="158 159.2 708 708" aria-hidden="true">
+          <path d="M308.88 618.92 L512 266.83 L715.12 618.92 Z M481.53 261.6 L288.41 596.37 L210.27 332.08 Z M813.73 332.08 L735.59 596.37 L542.47 261.6 Z M512 867.16 L316.53 647.92 L707.47 647.92 Z M291.79 280.94 L497.5 159.24 L497.5 227.49 Z M526.5 227.49 L526.5 159.24 L732.21 280.94 Z M206.25 671.71 L206.25 420.77 L267.35 627.44 Z M756.65 627.44 L817.75 420.77 L817.75 671.71 Z M437.38 827.04 L219.05 698.25 L281.93 652.69 Z M742.07 652.69 L804.95 698.25 L586.62 827.04 Z"/>
+        </svg>
+      </button>
+      <button role="tab" id="page-d10" aria-selected="false">D10</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -355,10 +395,36 @@ github.com/andrewmichaelpowell
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  function goTo(screenId) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    document.getElementById(screenId).classList.add("active");
+  function setChooser(chooser, index) {
+    chooser.dataset.selected = String(index);
+    chooser.querySelectorAll("button").forEach((btn, i) => {
+      btn.setAttribute("aria-selected", String(i === index));
+    });
   }
+
+  (function initPageChooser() {
+    const chooser = document.getElementById("page-chooser");
+    const screens = ["screen-main", "screen-d10"];
+
+    function showPage(index) {
+      screens.forEach((id, i) => {
+        document.getElementById(id).classList.toggle("active", i === index);
+      });
+      setChooser(chooser, index);
+    }
+
+    function selectPage(index) {
+      showPage(index);
+      try { localStorage.setItem("SelectedTab", String(index)); } catch (e) {}
+    }
+
+    let saved = 0;
+    try { saved = localStorage.getItem("SelectedTab") === "1" ? 1 : 0; } catch (e) {}
+    showPage(saved);
+
+    document.getElementById("page-main").addEventListener("click", () => selectPage(0));
+    document.getElementById("page-d10").addEventListener("click", () => selectPage(1));
+  })();
 
   // Main View
 
@@ -451,7 +517,7 @@ github.com/andrewmichaelpowell
     document.getElementById("main-zero").addEventListener("click", zero);
     document.getElementById("main-d").addEventListener("click", pressD);
     document.getElementById("main-roll").addEventListener("click", roll);
-    document.getElementById("open-d10").addEventListener("click", () => goTo("screen-d10"));
+    document.getElementById("main-roll-quick").addEventListener("click", roll);
   })();
 
   // D10 View
@@ -465,16 +531,12 @@ github.com/andrewmichaelpowell
     const diceValueEl = document.getElementById("d10-dice-value");
     const difficultyValueEl = document.getElementById("d10-difficulty-value");
     const successesValueEl = document.getElementById("d10-successes-value");
-    const diceLabelEl = document.getElementById("d10-dice-label");
-    const difficultyLabelEl = document.getElementById("d10-difficulty-label");
+    const chooser = document.getElementById("d10-chooser");
     const selectDiceBtn = document.getElementById("d10-select-dice");
     const selectDifficultyBtn = document.getElementById("d10-select-difficulty");
 
     function updateSelectionStyles() {
-      diceLabelEl.classList.toggle("selected", selected === 1);
-      difficultyLabelEl.classList.toggle("selected", selected === 2);
-      selectDiceBtn.classList.toggle("green", selected === 1);
-      selectDifficultyBtn.classList.toggle("green", selected === 2);
+      setChooser(chooser, selected - 1);
     }
 
     function clear() {
@@ -519,7 +581,6 @@ github.com/andrewmichaelpowell
     });
     document.getElementById("d10-clear").addEventListener("click", clear);
     document.getElementById("d10-roll").addEventListener("click", roll);
-    document.getElementById("d10-back").addEventListener("click", () => goTo("screen-main"));
 
     updateSelectionStyles();
   })();
