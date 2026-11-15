@@ -1,7 +1,7 @@
 // Maki Dice (Web)
 // github.com/andrewmichaelpowell
 
-const CACHE_VERSION = "maki-dice-v8";
+const CACHE_VERSION = "maki-dice-v9";
 
 const CORE_ASSETS = [
   "./",
